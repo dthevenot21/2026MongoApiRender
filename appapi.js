@@ -15,32 +15,6 @@ const app = express();
 
 const client = new MongoClient(process.env.MONGO_URI); //avec variables d'environnement
 
-/*-----------SERVEUR CLOUD
-const uri = "mongodb+srv://DTadmin:DTadmin@cluster0.o2zi7.mongodb.net/?appName=Cluster0";
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
-//-----------------
-*/
-
 //console du navigateur F12 : blocked by CORS policy + No 'Access-Control-Allow-Origin'
 //“Le navigateur bloque la requête car le serveur n’autorise pas les accès externes.”
 //installer cors côté serveur node.js : npm install cors
@@ -50,21 +24,35 @@ run().catch(console.dir);
 const cors = require("cors");
 app.use(cors());
 
-//await client.connect();
+//connexion 1 fois
+async function start() {
+  //await client.connect();
+  console.log("Connecté à MongoDB");
+
+  app.listen(process.env.PORT || 3000, () => {
+    console.log("Serveur lancé");
+  });
+}
+
+start();
 
 //GET-OK
 //liste des films
 app.get("/movies", async (req, res) => {
-  await client.connect();
- 
-  const db = client.db("dbmovies");
-  const movies = await db.collection("movies").find().toArray();
-  console.log("Liste des films" );//s'affiche sur le terminal du serveur
-  res.json(movies);
+  //await client.connect();
+  try {
+    const db = client.db("dbmovies");
+    const movies = await db.collection("movies").find().toArray();
+    console.log("Liste des films" );//s'affiche sur le terminal du serveur
+    res.json(movies);
+  }
+  catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 //liste des films d'une année 
-app.get("/movies", async (req, res) => {
+app.get("/movies/year/:year", async (req, res) => {
   const year = parseInt(req.params.year);
 
   const db = client.db("dbmovies");
@@ -132,6 +120,9 @@ app.put("/movies/:title", async (req, res) => {
   console.log("Serveur lancé sur http://localhost:3000");
 });*/
 
-app.listen(process.env.PORT || 3000);//port dynamique pour Render
+//port dynamique pour Render
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Serveur lancé sur le port", process.env.PORT || 3000);
+});
 
 console.log("Connexion à :", process.env.MONGO_URI);
