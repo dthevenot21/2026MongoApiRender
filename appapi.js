@@ -128,8 +128,10 @@ app.put("/movies/:title", async (req, res) => {
   });
 });
 
-app.listen(3000, () => {
+/*app.listen(3000, () => {
   console.log("Serveur lancé sur http://localhost:3000");
-});
+});*/
+
+app.listen(process.env.PORT || 3000);//port dynamique pour Render
 
 console.log("Connexion à :", process.env.MONGO_URI);
